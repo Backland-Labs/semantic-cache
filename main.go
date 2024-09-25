@@ -21,7 +21,7 @@ func main() {
 	})
 
 	app.Get("/get", handlers.HandleGetRequest)
-	//app.Post("/post", database.PostQdrant(qdrantClient))
+	app.Post("/post", handlers.HandlePutRequest)
 	//app.Get("/health")
 
 	log.Println("Server starting on :8080")

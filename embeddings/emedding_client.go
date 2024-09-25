@@ -37,13 +37,13 @@ func CreateEmbeddings(input string) ([]float32, error) {
 	}
 
 	url := "https://api.openai.com/v1/embeddings"
-	
+
 	requestBody := EmbeddingRequest{
 		Input:          input,
 		Model:          "text-embedding-3-small",
 		EncodingFormat: "float",
 	}
-	
+
 	jsonData, err := sonic.Marshal(requestBody)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling JSON: %w", err)
@@ -62,6 +62,7 @@ func CreateEmbeddings(input string) ([]float32, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Println(err)
 		return nil, fmt.Errorf("error sending request: %w", err)
 	}
 	defer resp.Body.Close()
@@ -73,19 +74,15 @@ func CreateEmbeddings(input string) ([]float32, error) {
 		return nil, fmt.Errorf("error reading response: %w", err)
 	}
 
-	var embeddingResponse []float32
+	var embeddingResponse EmbeddingResponse
 	err = sonic.Unmarshal(body, &embeddingResponse)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing response: %w", err)
 	}
 
-	return embeddingResponse, nil
-}
-
-// Helper function to get the embedding vector from the response
-func GetEmbeddingVector(response *EmbeddingResponse) ([]float32, error) {
-	if len(response.Data) == 0 {
+	if len(embeddingResponse.Data) == 0 {
 		return nil, fmt.Errorf("no embedding data in response")
 	}
-	return response.Data[0].Embedding, nil
+
+	return embeddingResponse.Data[0].Embedding, nil
 }
