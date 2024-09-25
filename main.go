@@ -14,7 +14,6 @@ type Message struct {
 }
 
 func main() {
-
 	app := fiber.New(fiber.Config{
 		JSONEncoder: sonic.Marshal,
 		JSONDecoder: sonic.Unmarshal,
@@ -22,7 +21,7 @@ func main() {
 
 	app.Get("/get", handlers.HandleGetRequest)
 	app.Post("/post", handlers.HandlePutRequest)
-	//app.Get("/health")
+	// app.Get("/health")
 
 	log.Println("Server starting on :8080")
 	log.Fatal(app.Listen(":8080"))

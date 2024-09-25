@@ -6,9 +6,9 @@ import (
 
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
-	"semantic-cache/embeddings"
-	"semantic-cache/database"
 	"github.com/qdrant/go-client/qdrant"
+	"semantic-cache/database"
+	"semantic-cache/embeddings"
 )
 
 type RequestBody struct {
@@ -17,20 +17,17 @@ type RequestBody struct {
 
 type ResponseBody struct {
 	CachedMessage []*qdrant.ScoredPoint `json:"cached_message"`
-	MessageFound bool `json:"message_found"`
+	MessageFound  bool                  `json:"message_found"`
 }
 
 type PutRequestBody struct {
-	Message string `json:"user_message"`
+	Message       string `json:"user_message"`
 	ModelResponse string `json:"model_response"`
 }
 
 type PutResponseBody struct {
 	Result string `json:"operation_result"`
 }
-
-
-
 
 func HandleGetRequest(c *fiber.Ctx) error {
 	// Parse the JSON body using Sonic
@@ -62,29 +59,28 @@ func HandleGetRequest(c *fiber.Ctx) error {
 		// Prepare the response
 		respBody := ResponseBody{
 			CachedMessage: searchResults,
-			MessageFound: false,
-	}
+			MessageFound:  false,
+		}
 
-	// Encode the response using Sonic
-	jsonResp, err := sonic.Marshal(respBody)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to encode response",
-		})
-	}
+		// Encode the response using Sonic
+		jsonResp, err := sonic.Marshal(respBody)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Failed to encode response",
+			})
+		}
 
-	// Set content type and send the response
-	c.Set("Content-Type", "application/json")
-	return c.Send(jsonResp)
+		// Set content type and send the response
+		c.Set("Content-Type", "application/json")
+		return c.Send(jsonResp)
 	}
 
 	// Prepare the response
 	respBody := ResponseBody{
 		CachedMessage: searchResults,
-		MessageFound: true,
-}
+		MessageFound:  true,
+	}
 
-	
 	// Encode the response using Sonic
 	jsonResp, err := sonic.Marshal(respBody)
 	if err != nil {
@@ -126,9 +122,8 @@ func HandlePutRequest(c *fiber.Ctx) error {
 	// Prepare the response
 	respBody := PutResponseBody{
 		Result: "operationInfo",
-}
+	}
 
-	
 	// Encode the response using Sonic
 	jsonResp, err := sonic.Marshal(respBody)
 	if err != nil {

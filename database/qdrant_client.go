@@ -3,7 +3,7 @@ package database
 import (
 	"context" // understand this and usage in file
 	"fmt"
-	"log" //swap for other logging library
+	"log" // swap for other logging library
 	"time"
 
 	"github.com/google/uuid"
@@ -18,13 +18,11 @@ var (
 )
 
 func InitializeQdrant() *qdrant.Client {
-
 	client, err := qdrant.NewClient(&qdrant.Config{
 		Host:   "localhost",
 		Port:   6334,
 		UseTLS: false,
 	})
-
 	if err != nil {
 		panic(err)
 	}
@@ -69,11 +67,9 @@ func InitializeQdrant() *qdrant.Client {
 	}
 
 	return client
-
 }
 
 func GetQdrant(client *qdrant.Client, vectors []float32) ([]*qdrant.ScoredPoint, error) {
-
 	// Query the database
 	searchedPoints, err := client.Query(context.Background(), &qdrant.QueryPoints{
 		CollectionName: collectionName,
@@ -87,10 +83,8 @@ func GetQdrant(client *qdrant.Client, vectors []float32) ([]*qdrant.ScoredPoint,
 	client.Close()
 
 	log.Printf("Found points: %s", searchedPoints)
-	
 
 	return searchedPoints, err
-
 }
 
 func PutQdrant(client *qdrant.Client, vectors []float32, message string, modelResponse string) *qdrant.UpdateResult {
@@ -100,10 +94,10 @@ func PutQdrant(client *qdrant.Client, vectors []float32, message string, modelRe
 	waitUpsert := true
 	upsertPoints := []*qdrant.PointStruct{
 		{
-			Id:      qdrant.NewIDUUID(id.String()), 
+			Id:      qdrant.NewIDUUID(id.String()),
 			Vectors: qdrant.NewVectorsDense(vectors),
 			Payload: qdrant.NewValueMap(map[string]any{
-				"user_message":    message,
+				"user_message":   message,
 				"model_response": modelResponse,
 			}),
 		},
@@ -118,7 +112,7 @@ func PutQdrant(client *qdrant.Client, vectors []float32, message string, modelRe
 	})
 	if err != nil {
 		log.Fatalf("Could not upsert points: %v", err)
-	 }
+	}
 	fmt.Println("Upsert", len(upsertPoints), "points")
 
 	client.Close()
