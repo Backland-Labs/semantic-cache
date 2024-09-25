@@ -28,7 +28,7 @@ vuln: $(CHECKER_BIN)/.installed ## Check for vulnerabilities
 	@#$(CHECKER_BIN)/govulncheck -test ./...
 	@$(CHECKER_BIN)/gosec -quiet -exclude=G104 ./...
 
-run: $(CHECKER_BIN)/.installed ## Run Glide
+run: $(CHECKER_BIN)/.installed ## Run Cache
 	@go run semantic-cache -o ./dist;
 
 build: ## Build Glide

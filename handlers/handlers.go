@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/qdrant/go-client/qdrant"
+	"github.com/rs/zerolog/log"
 	"semantic-cache/database"
 	"semantic-cache/embeddings"
 )
@@ -30,6 +30,7 @@ type PutResponseBody struct {
 }
 
 func HandleGetRequest(c *fiber.Ctx) error {
+	log.Info().Msg("Handling GET request")
 	// Parse the JSON body using Sonic
 	var reqBody RequestBody
 	if err := sonic.Unmarshal(c.Body(), &reqBody); err != nil {
@@ -38,21 +39,27 @@ func HandleGetRequest(c *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Println(reqBody)
+	log.Info().Msgf("Received request body: %v", reqBody)
 
 	// Execute a couple of steps (example operations)
 	reqBody.Message = strings.ToLower(reqBody.Message)
 
+	log.Info().Msgf("Converted message to lowercase: %v", reqBody.Message)
+
 	// create vectors for query
 	vectors, err := embeddings.CreateEmbeddings(reqBody.Message)
+
+	log.Info().Msg("Created vectors for query")
 
 	// query qdrant for response
 	// initialize databases
 	qdrantClient := database.InitializeQdrant()
 
+	log.Info().Msg("Initialized Qdrant client")
+
 	searchResults, err := database.GetQdrant(qdrantClient, vectors)
 
-	fmt.Println(searchResults)
+	log.Info().Msgf("Received search results: %v", searchResults)
 
 	if len(searchResults) == 0 {
 
@@ -98,26 +105,36 @@ func HandlePutRequest(c *fiber.Ctx) error {
 	// Parse the JSON body using Sonic
 	var reqBody PutRequestBody
 	if err := sonic.Unmarshal(c.Body(), &reqBody); err != nil {
+		log.Error().Msg("Cannot parse JSON")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Cannot parse JSON",
 		})
 	}
 
-	fmt.Println(reqBody)
+	log.Info().Msgf("Received request body: %v", reqBody)
 
 	// Execute a couple of steps (example operations)
 	reqBody.Message = strings.ToLower(reqBody.Message)
 
+	log.Info().Msgf("Converted message to lowercase: %v", reqBody.Message)
+
 	// create vectors for query
 	vectors, err := embeddings.CreateEmbeddings(reqBody.Message)
+	if err != nil {
+		log.Error().Msgf("Error creating vectors for query: %v", err)
+	}
+
+	log.Info().Msg("Created vectors for query")
 
 	// query qdrant for response
 	// initialize databases
 	qdrantClient := database.InitializeQdrant()
 
+	log.Info().Msg("Initialized Qdrant client")
+
 	operationInfo := database.PutQdrant(qdrantClient, vectors, reqBody.Message, reqBody.ModelResponse)
 
-	fmt.Println(operationInfo)
+	log.Info().Msgf("Received operation info: %v", operationInfo)
 
 	// Prepare the response
 	respBody := PutResponseBody{
@@ -127,6 +144,7 @@ func HandlePutRequest(c *fiber.Ctx) error {
 	// Encode the response using Sonic
 	jsonResp, err := sonic.Marshal(respBody)
 	if err != nil {
+		log.Error().Msg("Failed to encode response")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to encode response",
 		})

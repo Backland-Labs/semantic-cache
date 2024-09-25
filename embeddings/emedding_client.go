@@ -8,6 +8,8 @@ import (
 	"os"
 
 	"github.com/bytedance/sonic"
+	"github.com/joho/godotenv"
+	"github.com/rs/zerolog/log"
 )
 
 type EmbeddingRequest struct {
@@ -31,8 +33,13 @@ type EmbeddingResponse struct {
 }
 
 func CreateEmbeddings(input string) ([]float32, error) {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal().Msg("Error loading .env file")
+	}
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
+		log.Fatal().Msg("OPENAI_API_KEY environment variable not set")
 		return nil, fmt.Errorf("OPENAI_API_KEY environment variable not set")
 	}
 
@@ -49,7 +56,7 @@ func CreateEmbeddings(input string) ([]float32, error) {
 		return nil, fmt.Errorf("error marshalling JSON: %w", err)
 	}
 
-	fmt.Println(string(jsonData))
+	log.Info().Msgf("Creating request body: %s", string(jsonData))
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
@@ -59,24 +66,30 @@ func CreateEmbeddings(input string) ([]float32, error) {
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 	req.Header.Set("Content-Type", "application/json")
 
+	log.Info().Msgf("Sending request to %s", url)
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		log.Error().Msgf("Error sending request: %w", err)
 		return nil, fmt.Errorf("error sending request: %w", err)
 	}
 	defer resp.Body.Close()
 
-	fmt.Print("Response status: ", resp.Status)
+	log.Info().Msgf("Response status: %s", resp.Status)
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		log.Error().Msgf("Error reading response: %w", err)
 		return nil, fmt.Errorf("error reading response: %w", err)
 	}
+
+	log.Info().Msgf("Response body: %s", string(body))
 
 	var embeddingResponse EmbeddingResponse
 	err = sonic.Unmarshal(body, &embeddingResponse)
 	if err != nil {
+		log.Error().Msgf("Error parsing response: %w", err)
 		return nil, fmt.Errorf("error parsing response: %w", err)
 	}
 
