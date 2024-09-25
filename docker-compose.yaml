@@ -14,7 +14,7 @@ services:
       - source: qdrant_config
         target: /qdrant/config/production.yaml
     volumes:
-      - ./qdrant_data:/qdrant/storage
+      - ./tmp/qdrant_data:/qdrant/storage
     user: "1000"
   cache:
     container_name: cache 
@@ -23,6 +23,8 @@ services:
       - 8080:8080
     depends_on:
       - qdrant
+    env_file:
+      - ./.env
 
 configs:
   qdrant_config:
