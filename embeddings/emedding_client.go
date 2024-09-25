@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	//"os"
+	"os"
 
 	"github.com/bytedance/sonic"
 )
@@ -31,7 +31,7 @@ type EmbeddingResponse struct {
 }
 
 func CreateEmbeddings(input string) ([]float32, error) {
-	apiKey := "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"
+	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
 		return nil, fmt.Errorf("OPENAI_API_KEY environment variable not set")
 	}
