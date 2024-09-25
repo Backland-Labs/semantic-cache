@@ -6,6 +6,7 @@ import (
 	"log" //swap for other logging library
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/qdrant/go-client/qdrant"
 )
 
@@ -93,12 +94,13 @@ func GetQdrant(client *qdrant.Client, vectors []float32) ([]*qdrant.ScoredPoint,
 }
 
 func PutQdrant(client *qdrant.Client, vectors []float32, message string, modelResponse string) *qdrant.UpdateResult {
+	id, err := uuid.NewRandom()
 
 	// Upsert some data
 	waitUpsert := true
 	upsertPoints := []*qdrant.PointStruct{
 		{
-			Id:      qdrant.NewIDNum(1),
+			Id:      qdrant.NewIDUUID(id.String()), 
 			Vectors: qdrant.NewVectorsDense(vectors),
 			Payload: qdrant.NewValueMap(map[string]any{
 				"user_message":    message,
