@@ -4,6 +4,7 @@ import (
 	"context" // understand this and usage in file
 	"fmt"
 	"log" // swap for other logging library
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,7 +20,7 @@ var (
 
 func InitializeQdrant() *qdrant.Client {
 	client, err := qdrant.NewClient(&qdrant.Config{
-		Host:   "qdrant",
+		Host:   os.Getenv("QDRANT_HOST"),
 		Port:   6334,
 		UseTLS: false,
 	})
