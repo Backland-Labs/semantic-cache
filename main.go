@@ -7,6 +7,7 @@ import (
 
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/healthcheck"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -21,15 +22,18 @@ func main() {
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	log.Logger = log.With().Caller().Logger()
 
 	app := fiber.New(fiber.Config{
 		JSONEncoder: sonic.Marshal,
 		JSONDecoder: sonic.Unmarshal,
 	})
 
+	// Provide a minimal config
+	app.Use(healthcheck.New())
+
 	app.Get("/get", handlers.HandleGetRequest)
 	app.Post("/post", handlers.HandlePutRequest)
-	// app.Get("/health")
 
 	log.Info().Msg("Server starting on :8080")
 	app.Listen(":8080")
