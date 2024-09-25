@@ -19,7 +19,7 @@ var (
 
 func InitializeQdrant() *qdrant.Client {
 	client, err := qdrant.NewClient(&qdrant.Config{
-		Host:   "localhost",
+		Host:   "qdrant",
 		Port:   6334,
 		UseTLS: false,
 	})

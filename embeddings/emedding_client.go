@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/bytedance/sonic"
-	"github.com/joho/godotenv"
+	//"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 )
 
@@ -33,10 +33,10 @@ type EmbeddingResponse struct {
 }
 
 func CreateEmbeddings(input string) ([]float32, error) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal().Msg("Error loading .env file")
-	}
+	//err := godotenv.Load()
+	//if err != nil {
+	//	log.Fatal().Msg("Error loading .env file")
+	//}
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
 		log.Fatal().Msg("OPENAI_API_KEY environment variable not set")
@@ -83,8 +83,6 @@ func CreateEmbeddings(input string) ([]float32, error) {
 		log.Error().Msgf("Error reading response: %w", err)
 		return nil, fmt.Errorf("error reading response: %w", err)
 	}
-
-	log.Info().Msgf("Response body: %s", string(body))
 
 	var embeddingResponse EmbeddingResponse
 	err = sonic.Unmarshal(body, &embeddingResponse)
