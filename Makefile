@@ -31,7 +31,7 @@ vuln: $(CHECKER_BIN)/.installed ## Check for vulnerabilities
 run: $(CHECKER_BIN)/.installed ## Run Cache
 	@go run semantic-cache -o ./dist;
 
-build: ## Build Glide
+build: ## Build
 	@echo "🔨Building Semantic Cache binary.."
 	@echo "Build Date: $(BUILD_DATE)"
 	@go build -o ./dist;
