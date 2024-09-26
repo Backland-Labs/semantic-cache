@@ -32,7 +32,11 @@ func main() {
 	// Provide a minimal config
 	app.Use(healthcheck.New())
 
-	app.Get("/get", handlers.HandleGetRequest)
+	// Check the cache to see if there is any data
+
+	 app.Get("/get", handlers.HandleGetRequest)
+
+	// Put data in the cache
 	app.Post("/post", handlers.HandlePutRequest)
 
 	log.Info().Msg("Server starting on :8080")
