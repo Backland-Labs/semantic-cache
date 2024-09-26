@@ -71,7 +71,6 @@ func CreateEmbeddings(input string) ([]float32, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Error().Msgf("Error sending request: %w", err)
 		return nil, fmt.Errorf("error sending request: %w", err)
 	}
 	defer resp.Body.Close()
@@ -80,14 +79,12 @@ func CreateEmbeddings(input string) ([]float32, error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Error().Msgf("Error reading response: %w", err)
 		return nil, fmt.Errorf("error reading response: %w", err)
 	}
 
 	var embeddingResponse EmbeddingResponse
 	err = sonic.Unmarshal(body, &embeddingResponse)
 	if err != nil {
-		log.Error().Msgf("Error parsing response: %w", err)
 		return nil, fmt.Errorf("error parsing response: %w", err)
 	}
 

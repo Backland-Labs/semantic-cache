@@ -3,27 +3,23 @@ package database
 import (
 	"context" // understand this and usage in file
 	"fmt"
-	"log" // swap for other logging library
 	"os"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/qdrant/go-client/qdrant"
+
+	"github.com/rs/zerolog/log"
 )
 
-var (
-	collectionName              = "test_collection"
-	vectorSize           uint64 = 4
-	distance                    = qdrant.Distance_Dot
-	defaultSegmentNumber uint64 = 2
-)
+var collectionName = "test_collection"
 
 type ScoredPoint struct {
 	Id      *qdrant.PointId          `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // Point id
-	Payload map[string]*qdrant.Value `json:"payload,omitempty"`                                                       // Payload
+	Payload map[string]*qdrant.Value `json:"payload,omitempty"`                                  // Payload
 	/* 155-byte string literal not displayed */
-	Score      float32     `protobuf:"fixed32,3,opt,name=score,proto3" json:"score,omitempty"`                                 // Similarity score
-	Version    uint64      `protobuf:"varint,5,opt,name=version,proto3" json:"version,omitempty"`                              // Last update operation applied to this point
+	Score      float32            `protobuf:"fixed32,3,opt,name=score,proto3" json:"score,omitempty"`                                 // Similarity score
+	Version    uint64             `protobuf:"varint,5,opt,name=version,proto3" json:"version,omitempty"`                              // Last update operation applied to this point
 	Vectors    *qdrant.Vectors    `protobuf:"bytes,6,opt,name=vectors,proto3,oneof" json:"vectors,omitempty"`                         // Vectors to search
 	ShardKey   *qdrant.ShardKey   `protobuf:"bytes,7,opt,name=shard_key,json=shardKey,proto3,oneof" json:"shard_key,omitempty"`       // Shard key
 	OrderValue *qdrant.OrderValue `protobuf:"bytes,8,opt,name=order_value,json=orderValue,proto3,oneof" json:"order_value,omitempty"` // Order by value
@@ -31,9 +27,9 @@ type ScoredPoint struct {
 }
 
 type GetOutputJSON struct {
-    Score     float32 `json:"score"`
-	UserMessage string `json:"user_message"`
-	ModelResponse string `json:"model_response"`
+	Score         float32 `json:"score"`
+	UserMessage   string  `json:"user_message"`
+	ModelResponse string  `json:"model_response"`
 }
 
 func InitializeQdrant() *qdrant.Client {
@@ -53,17 +49,17 @@ func InitializeQdrant() *qdrant.Client {
 	// Execute health check
 	healthCheckResult, err := client.HealthCheck(ctx)
 	if err != nil {
-		log.Fatalf("Could not get health: %v", err)
+		log.Fatal().Msgf("Could not get health: %v", err)
 	}
 	log.Printf("Qdrant version: %s", healthCheckResult.GetVersion())
 
 	// check if collection exists
 	exists, err := client.CollectionExists(context.Background(), collectionName)
 	if err != nil {
-		log.Fatalf("Could not check if collection exists: %v", err)
+		log.Fatal().Msgf("Could not check if collection exists: %v", err)
 	}
 	if exists {
-		log.Println("Collection", collectionName, "exists")
+		log.Info().Msgf("Collection %s exists", collectionName)
 		return client
 	}
 
@@ -80,9 +76,9 @@ func InitializeQdrant() *qdrant.Client {
 		}),
 	})
 	if err != nil {
-		log.Fatalf("Could not create collection: %v", err)
+		log.Fatal().Msgf("Could not create collection: %v", err)
 	} else {
-		log.Println("Collection", collectionName, "created")
+		log.Info().Msgf("Collection %s created", collectionName)
 	}
 
 	return client
@@ -97,28 +93,28 @@ func GetQdrant(client *qdrant.Client, vectors []float32) ([]GetOutputJSON, error
 		ScoreThreshold: qdrant.PtrOf(float32(0.7)), // TODO: make this configurable
 	})
 	if err != nil {
-		log.Fatalf("Could not search points: %v", err)
+		log.Fatal().Msgf("Could not search points: %v", err)
 	}
 
 	client.Close()
 
-	log.Printf("Found points: %s", searchedPoints)
+	log.Info().Msg("Searched points")
 
 	var outputData []GetOutputJSON
-    for _, item := range searchedPoints {
-        output := GetOutputJSON{
-            Score:         item.Score,
+	for _, item := range searchedPoints {
+		output := GetOutputJSON{
+			Score:         item.Score,
 			UserMessage:   item.Payload["user_message"].GetStringValue(),
 			ModelResponse: item.Payload["model_response"].GetStringValue(),
-        }
-        outputData = append(outputData, output)
-    }
+		}
+		outputData = append(outputData, output)
+	}
 
 	return outputData, err
 }
 
 func PutQdrant(client *qdrant.Client, vectors []float32, message string, modelResponse string) *qdrant.UpdateResult {
-	id, err := uuid.NewRandom()
+	id, _ := uuid.NewRandom()
 
 	// Upsert some data
 	waitUpsert := true
@@ -133,7 +129,7 @@ func PutQdrant(client *qdrant.Client, vectors []float32, message string, modelRe
 		},
 	}
 
-	log.Println("Upsert", len(upsertPoints), "points")
+	log.Info().Msgf("Upserting %d points", len(upsertPoints))
 
 	operationInfo, err := client.Upsert(context.Background(), &qdrant.UpsertPoints{
 		CollectionName: collectionName,
@@ -141,7 +137,7 @@ func PutQdrant(client *qdrant.Client, vectors []float32, message string, modelRe
 		Points:         upsertPoints,
 	})
 	if err != nil {
-		log.Fatalf("Could not upsert points: %v", err)
+		log.Fatal().Msgf("Could not upsert points: %v", err)
 	}
 	fmt.Println("Upsert", len(upsertPoints), "points")
 
@@ -149,5 +145,3 @@ func PutQdrant(client *qdrant.Client, vectors []float32, message string, modelRe
 
 	return operationInfo
 }
-
-

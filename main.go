@@ -36,6 +36,7 @@ func main() {
 	app.Post("/post", handlers.HandlePutRequest)
 
 	log.Info().Msg("Server starting on :8080")
-	app.Listen(":8080")
-	// log.Fatal(app.Listen(":8080"))
+	if err := app.Listen(":8080"); err != nil {
+		log.Fatal().Err(err).Msg("Failed to start server")
+	}
 }

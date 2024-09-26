@@ -15,7 +15,7 @@ type RequestBody struct {
 }
 
 type ResponseBody struct {
-	MessageFound  bool                  `json:"message_found"`
+	MessageFound  bool                     `json:"message_found"`
 	CachedPayload []database.GetOutputJSON `json:"cached_payload"`
 }
 
@@ -47,6 +47,11 @@ func HandleGetRequest(c *fiber.Ctx) error {
 
 	// create vectors for query
 	vectors, err := embeddings.CreateEmbeddings(reqBody.Message)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to create embeddings",
+		})
+	}
 
 	log.Info().Msg("Created vectors for query")
 
@@ -57,6 +62,11 @@ func HandleGetRequest(c *fiber.Ctx) error {
 	log.Info().Msg("Initialized Qdrant client")
 
 	searchResults, err := database.GetQdrant(qdrantClient, vectors)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to get search results",
+		})
+	}
 
 	log.Info().Msgf("Received search results: %v", searchResults)
 
