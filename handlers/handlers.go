@@ -5,7 +5,6 @@ import (
 
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
-	"github.com/qdrant/go-client/qdrant"
 	"github.com/rs/zerolog/log"
 	"semantic-cache/database"
 	"semantic-cache/embeddings"
@@ -16,8 +15,8 @@ type RequestBody struct {
 }
 
 type ResponseBody struct {
-	CachedMessage []*qdrant.ScoredPoint `json:"cached_message"`
 	MessageFound  bool                  `json:"message_found"`
+	CachedPayload []database.GetOutputJSON `json:"cached_payload"`
 }
 
 type PutRequestBody struct {
@@ -65,7 +64,7 @@ func HandleGetRequest(c *fiber.Ctx) error {
 
 		// Prepare the response
 		respBody := ResponseBody{
-			CachedMessage: searchResults,
+			CachedPayload: searchResults,
 			MessageFound:  false,
 		}
 
@@ -84,7 +83,7 @@ func HandleGetRequest(c *fiber.Ctx) error {
 
 	// Prepare the response
 	respBody := ResponseBody{
-		CachedMessage: searchResults,
+		CachedPayload: searchResults,
 		MessageFound:  true,
 	}
 

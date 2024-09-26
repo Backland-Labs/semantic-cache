@@ -18,6 +18,24 @@ var (
 	defaultSegmentNumber uint64 = 2
 )
 
+type ScoredPoint struct {
+	Id      *qdrant.PointId          `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // Point id
+	Payload map[string]*qdrant.Value `json:"payload,omitempty"`                                                       // Payload
+	/* 155-byte string literal not displayed */
+	Score      float32     `protobuf:"fixed32,3,opt,name=score,proto3" json:"score,omitempty"`                                 // Similarity score
+	Version    uint64      `protobuf:"varint,5,opt,name=version,proto3" json:"version,omitempty"`                              // Last update operation applied to this point
+	Vectors    *qdrant.Vectors    `protobuf:"bytes,6,opt,name=vectors,proto3,oneof" json:"vectors,omitempty"`                         // Vectors to search
+	ShardKey   *qdrant.ShardKey   `protobuf:"bytes,7,opt,name=shard_key,json=shardKey,proto3,oneof" json:"shard_key,omitempty"`       // Shard key
+	OrderValue *qdrant.OrderValue `protobuf:"bytes,8,opt,name=order_value,json=orderValue,proto3,oneof" json:"order_value,omitempty"` // Order by value
+	// contains filtered or unexported fields
+}
+
+type GetOutputJSON struct {
+    Score     float32 `json:"score"`
+	UserMessage string `json:"user_message"`
+	ModelResponse string `json:"model_response"`
+}
+
 func InitializeQdrant() *qdrant.Client {
 	client, err := qdrant.NewClient(&qdrant.Config{
 		Host:   os.Getenv("QDRANT_HOST"),
@@ -70,12 +88,13 @@ func InitializeQdrant() *qdrant.Client {
 	return client
 }
 
-func GetQdrant(client *qdrant.Client, vectors []float32) ([]*qdrant.ScoredPoint, error) {
+func GetQdrant(client *qdrant.Client, vectors []float32) ([]GetOutputJSON, error) {
 	// Query the database
 	searchedPoints, err := client.Query(context.Background(), &qdrant.QueryPoints{
 		CollectionName: collectionName,
 		Query:          qdrant.NewQueryDense(vectors),
-		WithPayload:    qdrant.NewWithPayloadInclude("model_response"),
+		WithPayload:    qdrant.NewWithPayloadInclude("model_response", "user_message"),
+		ScoreThreshold: qdrant.PtrOf(float32(0.7)), // TODO: make this configurable
 	})
 	if err != nil {
 		log.Fatalf("Could not search points: %v", err)
@@ -85,7 +104,17 @@ func GetQdrant(client *qdrant.Client, vectors []float32) ([]*qdrant.ScoredPoint,
 
 	log.Printf("Found points: %s", searchedPoints)
 
-	return searchedPoints, err
+	var outputData []GetOutputJSON
+    for _, item := range searchedPoints {
+        output := GetOutputJSON{
+            Score:         item.Score,
+			UserMessage:   item.Payload["user_message"].GetStringValue(),
+			ModelResponse: item.Payload["model_response"].GetStringValue(),
+        }
+        outputData = append(outputData, output)
+    }
+
+	return outputData, err
 }
 
 func PutQdrant(client *qdrant.Client, vectors []float32, message string, modelResponse string) *qdrant.UpdateResult {
@@ -120,3 +149,5 @@ func PutQdrant(client *qdrant.Client, vectors []float32, message string, modelRe
 
 	return operationInfo
 }
+
+
