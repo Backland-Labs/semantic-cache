@@ -236,3 +236,4 @@ qdrant_data/collections/test_collection/0/segments/c20c9097-9ceb-4773-8df2-407b7
 qdrant_data/collections/test_collection/0/segments/c20c9097-9ceb-4773-8df2-407b7c143fa8/payload_index/MANIFEST-000009
 qdrant_data/collections/test_collection/0/segments/c20c9097-9ceb-4773-8df2-407b7c143fa8/payload_index/OPTIONS-000011
 .ko.yaml
+.env

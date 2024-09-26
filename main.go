@@ -8,6 +8,7 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/healthcheck"
+	"github.com/gofiber/fiber/v2/middleware/idempotency"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -31,6 +32,7 @@ func main() {
 
 	// Provide a minimal config
 	app.Use(healthcheck.New())
+	app.Use(idempotency.New())
 
 	// Check the cache to see if there is any data
 
