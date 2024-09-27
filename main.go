@@ -36,7 +36,7 @@ func main() {
 
 	// Check the cache to see if there is any data
 
-	 app.Get("/get", handlers.HandleGetRequest)
+	app.Get("/get", handlers.HandleGetRequest)
 
 	// Put data in the cache
 	app.Post("/post", handlers.HandlePutRequest)

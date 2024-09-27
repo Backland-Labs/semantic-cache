@@ -29,7 +29,6 @@ type PutResponseBody struct {
 }
 
 func HandleGetRequest(c *fiber.Ctx) error {
-
 	c.Accepts("text/plain", "application/json")
 	c.Accepts("json", "text")
 
@@ -115,11 +114,9 @@ func HandleGetRequest(c *fiber.Ctx) error {
 }
 
 func HandlePutRequest(c *fiber.Ctx) error {
-	
 	c.Accepts("text/plain", "application/json")
 	c.Accepts("json", "text")
 
-	
 	// Parse the JSON body using Sonic
 	var reqBody PutRequestBody
 	if err := sonic.Unmarshal(c.Body(), &reqBody); err != nil {

@@ -12,7 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var collectionName = "test_collection"
+var collectionName = os.Getenv("QDRANT_COLLECTION")
 
 type ScoredPoint struct {
 	Id      *qdrant.PointId          `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // Point id
