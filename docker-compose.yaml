@@ -19,6 +19,7 @@ services:
   cache:
     container_name: cache 
     image: ko.local/semantic-cache-a8044edf3c2796d6a5951c230da20a70:latest
+    restart: always
     ports:
       - 8080:8080
     depends_on:

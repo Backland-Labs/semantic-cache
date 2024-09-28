@@ -27,6 +27,7 @@ func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	log.Logger = log.With().Caller().Logger()
 
+	// Create a new Fiber instance
 	app := fiber.New(fiber.Config{
 		JSONEncoder: sonic.Marshal,
 		JSONDecoder: sonic.Unmarshal,
@@ -35,11 +36,11 @@ func main() {
 	// Provide a minimal config
 	app.Use(healthcheck.New())
 
-	// Check the cache to see if there is any data
-	app.Get("/get", handlers.HandleGetRequest)
+	// Route to check the cache to see if there is any data
+	app.Get("/check", handlers.HandleGetRequest)
 
-	// Put data in the cache
-	app.Post("/post", handlers.HandlePutRequest)
+	// Upsert data in the cache
+	app.Post("/write", handlers.HandlePutRequest)
 
 	// Create a channel to listen for OS signals
 	c := make(chan os.Signal, 1)
