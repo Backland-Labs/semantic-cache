@@ -4,14 +4,14 @@ import (
 	"context"
 	"os"
 	"os/signal"
-	"semantic-cache/handlers"
 	"syscall"
 	"time"
+
+	"semantic-cache/handlers"
 
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/healthcheck"
-	"github.com/gofiber/fiber/v2/middleware/idempotency"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
