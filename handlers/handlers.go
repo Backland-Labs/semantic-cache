@@ -3,7 +3,6 @@ package handlers
 import (
 	"strings"
 
-	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 	"semantic-cache/database"
@@ -34,7 +33,7 @@ func HandleGetRequest(c *fiber.Ctx) error {
 	log.Info().Msg("Handling GET request")
 	// Parse the JSON body using Sonic
 	var reqBody RequestBody
-	if err := sonic.Unmarshal(c.Body(), &reqBody); err != nil {
+	if err := c.App().Config().JSONDecoder(c.Body(), &reqBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Cannot parse JSON",
 		})
@@ -81,7 +80,7 @@ func HandleGetRequest(c *fiber.Ctx) error {
 		}
 
 		// Encode the response using Sonic
-		jsonResp, err := sonic.Marshal(respBody)
+		jsonResp, err := c.App().Config().JSONEncoder(respBody)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Failed to encode response",
@@ -100,7 +99,7 @@ func HandleGetRequest(c *fiber.Ctx) error {
 	}
 
 	// Encode the response using Sonic
-	jsonResp, err := sonic.Marshal(respBody)
+	jsonResp, err := c.App().Config().JSONEncoder(respBody)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to encode response",
@@ -118,7 +117,7 @@ func HandlePutRequest(c *fiber.Ctx) error {
 
 	// Parse the JSON body using Sonic
 	var reqBody PutRequestBody
-	if err := sonic.Unmarshal(c.Body(), &reqBody); err != nil {
+	if err := c.App().Config().JSONDecoder(c.Body(), &reqBody); err != nil {
 		log.Error().Msg("Cannot parse JSON")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Cannot parse JSON",
@@ -156,7 +155,7 @@ func HandlePutRequest(c *fiber.Ctx) error {
 	}
 
 	// Encode the response using Sonic
-	jsonResp, err := sonic.Marshal(respBody)
+	jsonResp, err := c.App().Config().JSONEncoder(respBody)
 	if err != nil {
 		log.Error().Msg("Failed to encode response")
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
