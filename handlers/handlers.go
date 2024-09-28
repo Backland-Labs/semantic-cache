@@ -30,7 +30,6 @@ type PutResponseBody struct {
 
 func HandleGetRequest(c *fiber.Ctx) error {
 	c.Accepts("text/plain", "application/json")
-	c.Accepts("json", "text")
 
 	log.Info().Msg("Handling GET request")
 	// Parse the JSON body using Sonic
@@ -60,7 +59,7 @@ func HandleGetRequest(c *fiber.Ctx) error {
 
 	// query qdrant for response
 	// initialize databases
-	qdrantClient := database.InitializeQdrant()
+	qdrantClient := database.GetQdrantClient()
 
 	log.Info().Msg("Initialized Qdrant client")
 
@@ -143,7 +142,7 @@ func HandlePutRequest(c *fiber.Ctx) error {
 
 	// query qdrant for response
 	// initialize databases
-	qdrantClient := database.InitializeQdrant()
+	qdrantClient := database.GetQdrantClient()
 
 	log.Info().Msg("Initialized Qdrant client")
 
