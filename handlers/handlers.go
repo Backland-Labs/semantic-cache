@@ -47,7 +47,7 @@ func HandleGetRequest(c *fiber.Ctx) error {
 	log.Info().Msgf("Converted message to lowercase: %v", reqBody.Message)
 
 	// create vectors for query
-	vectors, err := embeddings.CreateEmbeddings(reqBody.Message)
+	vectors, err := embeddings.CreateOpenAIEmbeddings(reqBody.Message)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to create embeddings",
@@ -58,7 +58,7 @@ func HandleGetRequest(c *fiber.Ctx) error {
 
 	// query qdrant for response
 	// initialize databases
-	qdrantClient := database.GetQdrantClient()
+	qdrantClient := database.GetQdrantClient() // specificy this only once
 
 	log.Info().Msg("Initialized Qdrant client")
 
@@ -132,7 +132,8 @@ func HandlePutRequest(c *fiber.Ctx) error {
 	log.Info().Msgf("Converted message to lowercase: %v", reqBody.Message)
 
 	// create vectors for query
-	vectors, err := embeddings.CreateEmbeddings(reqBody.Message)
+	localModel := embeddings.InitFastEmbeddings()
+	vectors, err := embeddings.CreateFastEmbeddings(reqBody.Message, localModel)
 	if err != nil {
 		log.Error().Msgf("Error creating vectors for query: %v", err)
 	}
@@ -151,7 +152,7 @@ func HandlePutRequest(c *fiber.Ctx) error {
 
 	// Prepare the response
 	respBody := PutResponseBody{
-		Result: "operationInfo",
+		Result: operationInfo.String(),
 	}
 
 	// Encode the response using Sonic
