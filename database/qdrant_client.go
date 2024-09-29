@@ -134,7 +134,7 @@ func GetQdrant(client *qdrant.Client, vectors []float32) ([]GetOutputJSON, error
 	return outputData, err
 }
 
-func PutQdrant(client *qdrant.Client, vectors []float32, message string, modelResponse string) *qdrant.UpdateResult {
+func PutQdrant(client *qdrant.Client, vectors []float32, message string, modelResponse string) qdrant.UpdateStatus {
 	id, _ := uuid.NewRandom()
 
 	// Upsert some data
@@ -162,5 +162,5 @@ func PutQdrant(client *qdrant.Client, vectors []float32, message string, modelRe
 	}
 	fmt.Println("Upsert", len(upsertPoints), "points")
 
-	return operationInfo
+	return operationInfo.GetStatus()
 }
