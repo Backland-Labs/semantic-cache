@@ -132,8 +132,7 @@ func HandlePutRequest(c *fiber.Ctx) error {
 	log.Info().Msgf("Converted message to lowercase: %v", reqBody.Message)
 
 	// create vectors for query
-	localModel := embeddings.InitFastEmbeddings()
-	vectors, err := embeddings.CreateFastEmbeddings(reqBody.Message, localModel)
+	vectors, err := embeddings.CreateOpenAIEmbeddings(reqBody.Message)
 	if err != nil {
 		log.Error().Msgf("Error creating vectors for query: %v", err)
 	}

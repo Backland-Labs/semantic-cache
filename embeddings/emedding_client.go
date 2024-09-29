@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/anush008/fastembed-go"
 	"github.com/bytedance/sonic"
 	"github.com/rs/zerolog/log"
 )
@@ -93,34 +92,4 @@ func CreateOpenAIEmbeddings(input string) ([]float32, error) {
 	}
 
 	return embeddingResponse.Data[0].Embedding, nil
-}
-
-func CreateFastEmbeddings(query string, model *fastembed.FlagEmbedding) ([]float32, error) {
-	embeddings, err := model.QueryEmbed(query) //  -> Embeddings length: 3
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to query embeddings")
-		panic(err)
-	}
-
-	return embeddings, nil
-}
-
-func InitFastEmbeddings() *fastembed.FlagEmbedding {
-	// With custom options. TODO init when server starts.
-	options := fastembed.InitOptions{
-		Model:    fastembed.BGEBaseENV15,
-		CacheDir: "model_cache",
-	}
-
-	var model *fastembed.FlagEmbedding
-	var err error
-	model, err = fastembed.NewFlagEmbedding(&options)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to initialize FastEmbedding model")
-		panic(err)
-	}
-
-	//defer model.Destroy()
-
-	return model
 }

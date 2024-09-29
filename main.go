@@ -34,8 +34,8 @@ func main() {
 		JSONDecoder: sonic.Unmarshal,
 	})
 
-	//load embeddings mode;
-	//localModel := embeddings.InitFastEmbeddings()
+	// load embeddings mode;
+	// localModel := embeddings.InitFastEmbeddings()
 
 	// Provide a minimal config
 	app.Use(healthcheck.New())
@@ -49,7 +49,6 @@ func main() {
 	// Create a channel to listen for OS signals
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-
 
 	// Start the server in a goroutine
 	go func() {
