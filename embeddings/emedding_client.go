@@ -11,6 +11,15 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type LocalEmbeddingRequest struct {
+	Model  string `json:"model"`
+	Prompt string `json:"prompt"`
+}
+
+type LocalEmbeddingReponse struct {
+	Embeddings []float32 `json:"embedding"`
+}
+
 type EmbeddingRequest struct {
 	Input          string `json:"input"`
 	Model          string `json:"model"`
@@ -32,10 +41,7 @@ type EmbeddingResponse struct {
 }
 
 func CreateOpenAIEmbeddings(input string) ([]float32, error) {
-	//err := godotenv.Load()
-	//if err != nil {
-	//	log.Fatal().Msg("Error loading .env file")
-	//}
+	
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
 		log.Fatal().Msg("OPENAI_API_KEY environment variable not set")
@@ -92,4 +98,56 @@ func CreateOpenAIEmbeddings(input string) ([]float32, error) {
 	}
 
 	return embeddingResponse.Data[0].Embedding, nil
+}
+
+func CreateLocalEmbeddings(input string) ([]float32, error) {
+	
+	url := "http://ollama:11434/api/embeddings"
+
+	requestBody := LocalEmbeddingRequest{
+		Model:  "nomic-embed-text",
+		Prompt: input,
+	}
+
+	jsonData, err := sonic.Marshal(requestBody)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling JSON: %w", err)
+	}
+
+	log.Info().Msgf("Creating request body: %s", string(jsonData))
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	log.Info().Msgf("Sending request to %s", url)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error sending request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	log.Info().Msgf("Response status: %s", resp.Status)
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response: %w", err)
+	}
+
+	var embeddingResponse LocalEmbeddingReponse
+	err = sonic.Unmarshal(body, &embeddingResponse)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing response: %w", err)
+	}
+
+	if len(embeddingResponse.Embeddings) == 0 {
+		return nil, fmt.Errorf("no embedding data in response")
+	}
+
+	return embeddingResponse.Embeddings, nil
 }
