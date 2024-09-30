@@ -9,9 +9,9 @@ PID=$!
 # wait for ollama server to start
 sleep 5
 
-echo "Pulling mode...."
+echo "⛴️ Pulling mode...."
 ollama pull nomic-embed-text
-echo "Done"
+echo "🍻 Done"
 
 # wait for ollama server to finish
 wait $PID
