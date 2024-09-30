@@ -24,12 +24,14 @@ services:
     tty: true
     volumes:
       - ollama:/root/.ollama
+      - ./ollama-entrypoint.sh:/ollama-entrypoint.sh
     environment:
       - OLLAMA_KEEP_ALIVE=12h
     ports:
       - 11434:11434
     expose:
       - 11434
+    entrypoint: ["//bin/sh", "/ollama-entrypoint.sh"]
   
   cache:
     container_name: cache 
