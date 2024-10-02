@@ -16,6 +16,26 @@ SemCache fills the need for lightweight tools that provide core functionality wi
 
 ## Endpoints
 
-`/check` - Checks if there is any data in the cache
-`/write` - Upserts data in the cache
+`/check` - Checks if there is any data in the cache - GET
+`/write` - Upserts data in the cache - POST
 
+## Quickstart
+
+`git clone https://github.com/Backland-Labs/semantic-cache.git`
+
+Create a .env file int he repo root with the following contents:
+
+```bash
+QDRANT_HOST="qdrant"
+QDRANT_COLLECTION="llmcache" # this can be anything
+```
+
+Check that the image for the cache container in the `docker-compose.yaml` file is correct:
+
+`ghcr.io/backland-labs/semantic-cache/semantic-cache-a8044edf3c2796d6a5951c230da20a70:latest`
+
+Then:
+
+`docker-compose up`
+
+The cache will be available on `http://localhost:8080/`
