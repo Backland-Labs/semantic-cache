@@ -24,7 +24,7 @@ type PutRequestBody struct {
 }
 
 type PutResponseBody struct {
-	Result string `json:"operation_result"`
+	Result string `json:"result"`
 }
 
 func HandleGetRequest(c *fiber.Ctx) error {
@@ -113,7 +113,6 @@ func HandleGetRequest(c *fiber.Ctx) error {
 
 func HandlePutRequest(c *fiber.Ctx) error {
 	c.Accepts("text/plain", "application/json")
-	c.Accepts("json", "text")
 
 	// Parse the JSON body using Sonic
 	var reqBody PutRequestBody
@@ -126,7 +125,7 @@ func HandlePutRequest(c *fiber.Ctx) error {
 
 	log.Info().Msgf("Received request body: %v", reqBody)
 
-	// Execute a couple of steps (example operations)
+	// convert to lowercase
 	reqBody.Message = strings.ToLower(reqBody.Message)
 
 	log.Info().Msgf("Converted message to lowercase: %v", reqBody.Message)
@@ -139,22 +138,19 @@ func HandlePutRequest(c *fiber.Ctx) error {
 
 	log.Info().Msg("Created vectors for query")
 
-	// query qdrant for response
-	// initialize databases
+	// Acess Qdrant client
 	qdrantClient := database.GetQdrantClient()
-
-	log.Info().Msg("Initialized Qdrant client")
 
 	operationInfo := database.PutQdrant(qdrantClient, vectors, reqBody.Message, reqBody.ModelResponse)
 
-	log.Info().Msgf("Received operation info: %v", operationInfo)
+	log.Info().Msgf("received operation info: %v", operationInfo)
 
 	// Prepare the response
 	respBody := PutResponseBody{
 		Result: operationInfo.String(),
 	}
 
-	// Encode the response using Sonic
+	// Encode the response
 	jsonResp, err := c.App().Config().JSONEncoder(respBody)
 	if err != nil {
 		log.Error().Msg("Failed to encode response")
