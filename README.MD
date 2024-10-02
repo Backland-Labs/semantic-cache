@@ -17,6 +17,7 @@ SemCache fills the need for lightweight tools that provide core functionality wi
 ## Endpoints
 
 `/check` - Checks if there is any data in the cache - GET
+
 `/write` - Upserts data in the cache - POST
 
 ## Quickstart
