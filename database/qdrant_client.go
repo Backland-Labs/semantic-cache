@@ -18,6 +18,7 @@ var (
 	qdrantClientOnce     sync.Once
 	collectionName       = os.Getenv("QDRANT_COLLECTION")
 	qdrantHost           = os.Getenv("QDRANT_HOST")
+	collectionDimesnions = uint64(768)
 )
 
 type ScoredPoint struct {
@@ -70,7 +71,7 @@ func initializeQdrant() (*qdrant.Client, error) {
 	err = client.CreateCollection(ctx, &qdrant.CreateCollection{
 		CollectionName: collectionName,
 		VectorsConfig: qdrant.NewVectorsConfig(&qdrant.VectorParams{
-			Size:     1536,
+			Size:     collectionDimesnions,
 			Distance: qdrant.Distance_Cosine,
 			OnDisk:   qdrant.PtrOf(true),
 		}),

@@ -14,6 +14,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/healthcheck"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	//"semantic-cache/embeddings"
 )
 
 type Message struct {
@@ -32,6 +33,9 @@ func main() {
 		JSONEncoder: sonic.Marshal,
 		JSONDecoder: sonic.Unmarshal,
 	})
+
+	// load embeddings mode;
+	// localModel := embeddings.InitFastEmbeddings()
 
 	// Provide a minimal config
 	app.Use(healthcheck.New())

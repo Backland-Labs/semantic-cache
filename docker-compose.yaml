@@ -16,17 +16,38 @@ services:
     volumes:
       - ./tmp/qdrant_data:/qdrant/storage
     user: "1000"
+  
+  ollama:
+    image: ollama/ollama:latest
+    restart: always
+    container_name: ollama
+    tty: true
+    volumes:
+      - ollama:/root/.ollama
+      - ./ollama-entrypoint.sh:/ollama-entrypoint.sh
+    environment:
+      - OLLAMA_KEEP_ALIVE=12h
+    ports:
+      - 11434:11434
+    expose:
+      - 11434
+    entrypoint: ["//bin/sh", "/ollama-entrypoint.sh"]
+  
   cache:
     container_name: cache 
-    image: ko.local/semantic-cache-a8044edf3c2796d6a5951c230da20a70:latest
+    image: ko.local/semantic-cache-a8044edf3c2796d6a5951c230da20a70 # update this to your image
     restart: always
+    #pull_policy: always
     ports:
       - 8080:8080
     depends_on:
       - qdrant
+      - ollama
     env_file:
       - ./.env
 
+volumes:
+  ollama:
 configs:
   qdrant_config:
     content: |
