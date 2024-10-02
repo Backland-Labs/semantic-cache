@@ -18,3 +18,4 @@ SemCache fills the need for lightweight tools that provide core functionality wi
 
 `/check` - Checks if there is any data in the cache
 `/write` - Upserts data in the cache
+

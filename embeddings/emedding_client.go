@@ -41,7 +41,6 @@ type EmbeddingResponse struct {
 }
 
 func CreateOpenAIEmbeddings(input string) ([]float32, error) {
-	
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
 		log.Fatal().Msg("OPENAI_API_KEY environment variable not set")
@@ -101,7 +100,6 @@ func CreateOpenAIEmbeddings(input string) ([]float32, error) {
 }
 
 func CreateLocalEmbeddings(input string) ([]float32, error) {
-	
 	url := "http://ollama:11434/api/embeddings"
 
 	requestBody := LocalEmbeddingRequest{
