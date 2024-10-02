@@ -21,9 +21,11 @@ SemCache fills the need for lightweight tools that provide core functionality wi
 
 ## Quickstart
 
+To begin:
+
 `git clone https://github.com/Backland-Labs/semantic-cache.git`
 
-Create a .env file int he repo root with the following contents:
+Create a .env file in the repo root with the following contents:
 
 ```bash
 QDRANT_HOST="qdrant"
