@@ -9,6 +9,3 @@ SemCache is an open-source semantic cache microservice for LLM applications. Sem
 
 ### When to use SemCache
 SemCache fills the need for lightweight tools that provide core functionality without the bloat of the existing libraries. SemCache is built with cloud native deployments in mind.
-
-### Quick Start
-
