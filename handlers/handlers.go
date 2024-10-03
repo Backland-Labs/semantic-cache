@@ -7,10 +7,13 @@ import (
 	"github.com/rs/zerolog/log"
 	"semantic-cache/database"
 	"semantic-cache/embeddings"
+	"github.com/go-playground/validator/v10"
 )
 
+var valid = validator.New()
+
 type RequestBody struct {
-	Message string `json:"user_message"`
+	Message string `json:"user_message" valid:"required,min=1"`
 }
 
 type ResponseBody struct {
@@ -19,18 +22,21 @@ type ResponseBody struct {
 }
 
 type PutRequestBody struct {
-	Message       string `json:"user_message"`
-	ModelResponse string `json:"model_response"`
+	Message       string `json:"user_message" valid:"required,min=1"`
+	ModelResponse string `json:"model_response" valid:"required,min=1"`
 }
 
 type PutResponseBody struct {
 	Result string `json:"operation_result"`
 }
 
+
 func HandleGetRequest(c *fiber.Ctx) error {
 	c.Accepts("text/plain", "application/json")
 
 	log.Info().Msg("Handling GET request")
+
+
 	// Parse the JSON body using Sonic
 	var reqBody RequestBody
 	if err := c.App().Config().JSONDecoder(c.Body(), &reqBody); err != nil {
@@ -38,6 +44,12 @@ func HandleGetRequest(c *fiber.Ctx) error {
 			"error": "Cannot parse JSON",
 		})
 	}
+
+	if err := valid.Struct(&reqBody); err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+            "error": "Validation not successful",
+        })
+    }
 
 	log.Info().Msgf("Received request body: %v", reqBody)
 
@@ -114,7 +126,8 @@ func HandleGetRequest(c *fiber.Ctx) error {
 func HandlePutRequest(c *fiber.Ctx) error {
 	c.Accepts("text/plain", "application/json")
 	c.Accepts("json", "text")
-
+    
+	
 	// Parse the JSON body using Sonic
 	var reqBody PutRequestBody
 	if err := c.App().Config().JSONDecoder(c.Body(), &reqBody); err != nil {
@@ -123,6 +136,12 @@ func HandlePutRequest(c *fiber.Ctx) error {
 			"error": "Cannot parse JSON",
 		})
 	}
+
+	if err := valid.Struct(&reqBody); err != nil {
+        return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+            "error": "Validation not successful",
+        })
+    }
 
 	log.Info().Msgf("Received request body: %v", reqBody)
 
