@@ -20,7 +20,14 @@ SemCache fills the need for lightweight tools that provide core functionality wi
 
 `/write` - Upserts data in the cache - POST
 
-## Quickstart
+## Quickstart - Development
+
+The docker compose file will create 3 containers:
+- HTTP Server
+- Qdrant
+- Embedding model
+
+
 
 To begin:
 
