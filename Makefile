@@ -42,9 +42,6 @@ test: ## Run tests
 test-cov: ## Run tests with coverage
 	@go tool cover -func=coverage.out
 
-docs-api: $(CHECKER_BIN)/.installed ## Generate OpenAPI API docs
-	@$(CHECKER_BIN)/swag init
-
 telemetry-up: ## Start observability services needed to receive Glides signals
 	@docker-compose --profile telemetry up --wait
 	@echo "Jaeger UI: http://localhost:16686/"

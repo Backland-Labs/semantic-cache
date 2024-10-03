@@ -3,14 +3,17 @@ package handlers
 import (
 	"strings"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 	"semantic-cache/database"
 	"semantic-cache/embeddings"
 )
 
+var validate = validator.New()
+
 type RequestBody struct {
-	Message string `json:"user_message"`
+	Message string `json:"user_message" validate:"required,min=1"`
 }
 
 type ResponseBody struct {
@@ -19,8 +22,8 @@ type ResponseBody struct {
 }
 
 type PutRequestBody struct {
-	Message       string `json:"user_message"`
-	ModelResponse string `json:"model_response"`
+	Message       string `json:"user_message" validate:"required,min=1"`
+	ModelResponse string `json:"model_response" validate:"required,min=1"`
 }
 
 type PutResponseBody struct {
@@ -36,6 +39,13 @@ func HandleGetRequest(c *fiber.Ctx) error {
 	if err := c.App().Config().JSONDecoder(c.Body(), &reqBody); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Cannot parse JSON",
+		})
+	}
+
+	if err := validate.Struct(reqBody); err != nil {
+		log.Error().Err(err).Msg("Invalid request body. Missing required fields")
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
 		})
 	}
 
@@ -120,6 +130,13 @@ func HandlePutRequest(c *fiber.Ctx) error {
 		log.Error().Msg("Cannot parse JSON")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Cannot parse JSON",
+		})
+	}
+
+	if err := validate.Struct(reqBody); err != nil {
+		log.Error().Err(err).Msg("Invalid request body")
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
 		})
 	}
 
