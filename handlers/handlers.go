@@ -57,7 +57,7 @@ func HandleGetRequest(c *fiber.Ctx) error {
 	log.Info().Msgf("Converted message to lowercase: %v", reqBody.Message)
 
 	// create vectors for query
-	vectors, err := embeddings.CreateOpenAIEmbeddings(reqBody.Message)
+	vectors, err := embeddings.CreateLocalEmbeddings(reqBody.Message)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to create embeddings",
