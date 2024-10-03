@@ -37,15 +37,16 @@ func HandleGetRequest(c *fiber.Ctx) error {
 	// Parse the JSON body using Sonic
 	var reqBody RequestBody
 	if err := c.App().Config().JSONDecoder(c.Body(), &reqBody); err != nil {
+		log.Error().Msg("cannot parse JSON")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Cannot parse JSON",
+			"error": "cannot parse JSON",
 		})
 	}
 
 	if err := validate.Struct(reqBody); err != nil {
-		log.Error().Err(err).Msg("Invalid request body. Missing required fields")
+		log.Error().Msg("invalid request body")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
+			"error": "invalid request body",
 		})
 	}
 
@@ -59,8 +60,9 @@ func HandleGetRequest(c *fiber.Ctx) error {
 	// create vectors for query
 	vectors, err := embeddings.CreateLocalEmbeddings(reqBody.Message)
 	if err != nil {
+		log.Error().Msgf("error creating vectors for query: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to create embeddings",
+			"error": "failed to create embeddings",
 		})
 	}
 
