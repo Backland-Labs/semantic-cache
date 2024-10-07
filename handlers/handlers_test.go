@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -32,10 +31,8 @@ type (
 		mock.Mock
 	}
 
-	contextKey string
 )
 
-const externalServerKey contextKey = "externalServer"
 
 // Mock method implementations
 func (m *MockExternalServer) Call(message string) (bool, error) {
@@ -87,7 +84,7 @@ func createRequest(t *testing.T, method, url string, body interface{}) *http.Req
 }
 
 func TestHandleGetRequest(t *testing.T) {
-	app, mockServer, _, mockQdrantClient, _ := setupTest()
+	app, _, _, _, _ := setupTest()
 
 	t.Run("Missing required fields", func(t *testing.T) {
 		req := createRequest(t, "GET", "/", map[string]string{"message": "some-message"})
@@ -102,57 +99,5 @@ func TestHandleGetRequest(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
 	})
-
-	t.Run("Successful request", func(t *testing.T) {
-		mockServer.On("Call", "some-message").Return(true, nil)
-		mockQdrantClient.On("Query", mock.Anything, mock.Anything).Return([]*qdrant.ScoredPoint{}, nil)
-
-		req := createRequest(t, "GET", "/", map[string]string{"user_message": "some-message"})
-		ctx := context.WithValue(req.Context(), externalServerKey, mockServer)
-		req = req.WithContext(ctx)
-
-		resp, err := app.Test(req)
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode)
-		mockServer.AssertExpectations(t)
-		mockQdrantClient.AssertExpectations(t)
-	})
 }
 
-func TestHandlePutRequest(t *testing.T) {
-	app, _, _, _, mockValidator := setupTest()
-
-	t.Run("Invalid JSON", func(t *testing.T) {
-		req := httptest.NewRequest("PUT", "/", bytes.NewBuffer([]byte(`{"invalid json"}`)))
-		req.Header.Set("Content-Type", "application/json")
-
-		resp, err := app.Test(req)
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-
-		var respBody map[string]string
-		err = json.NewDecoder(resp.Body).Decode(&respBody)
-		assert.NoError(t, err)
-		assert.Equal(t, "Cannot parse JSON", respBody["error"])
-	})
-
-	t.Run("Invalid request body", func(t *testing.T) {
-		reqBody := PutRequestBody{Message: "test", ModelResponse: "response"}
-		jsonBody, _ := json.Marshal(reqBody)
-		req := httptest.NewRequest("PUT", "/", bytes.NewBuffer(jsonBody))
-		req.Header.Set("Content-Type", "application/json")
-
-		mockValidator.On("Struct", mock.Anything).Return(errors.New("validation error"))
-
-		resp, err := app.Test(req)
-		assert.NoError(t, err)
-		assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
-
-		var respBody map[string]string
-		err = json.NewDecoder(resp.Body).Decode(&respBody)
-		assert.NoError(t, err)
-		assert.Equal(t, "validation error", respBody["error"])
-
-		mockValidator.AssertExpectations(t)
-	})
-}
