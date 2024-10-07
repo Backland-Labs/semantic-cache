@@ -10,7 +10,10 @@ import (
 	"semantic-cache/embeddings"
 )
 
-var validate = validator.New()
+var (
+	validate = validator.New()
+	url      = "http://ollama:11434/api/embeddings"
+)
 
 type RequestBody struct {
 	Message string `json:"user_message" validate:"required,min=1"`
@@ -58,7 +61,7 @@ func HandleGetRequest(c *fiber.Ctx) error {
 	log.Info().Msgf("Converted message to lowercase: %v", reqBody.Message)
 
 	// create vectors for query
-	vectors, err := embeddings.CreateLocalEmbeddings(reqBody.Message)
+	vectors, err := embeddings.CreateLocalEmbeddings(reqBody.Message, url)
 	if err != nil {
 		log.Error().Msgf("error creating vectors for query: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -150,7 +153,7 @@ func HandlePutRequest(c *fiber.Ctx) error {
 	log.Info().Msgf("Converted message to lowercase: %v", reqBody.Message)
 
 	// create vectors for query
-	vectors, err := embeddings.CreateLocalEmbeddings(reqBody.Message)
+	vectors, err := embeddings.CreateLocalEmbeddings(reqBody.Message, url)
 	if err != nil {
 		log.Error().Msgf("Error creating vectors for query: %v", err)
 	}

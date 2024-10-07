@@ -40,14 +40,12 @@ type EmbeddingResponse struct {
 	} `json:"usage"`
 }
 
-func CreateOpenAIEmbeddings(input string) ([]float32, error) {
+func CreateOpenAIEmbeddings(input string, url string) ([]float32, error) {
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
 		log.Fatal().Msg("OPENAI_API_KEY environment variable not set")
 		return nil, fmt.Errorf("OPENAI_API_KEY environment variable not set")
 	}
-
-	url := "https://api.openai.com/v1/embeddings"
 
 	requestBody := EmbeddingRequest{
 		Input:          input,
@@ -99,9 +97,7 @@ func CreateOpenAIEmbeddings(input string) ([]float32, error) {
 	return embeddingResponse.Data[0].Embedding, nil
 }
 
-func CreateLocalEmbeddings(input string) ([]float32, error) {
-	url := "http://ollama:11434/api/embeddings"
-
+func CreateLocalEmbeddings(input string, url string) ([]float32, error) {
 	requestBody := LocalEmbeddingRequest{
 		Model:  "nomic-embed-text",
 		Prompt: input,
